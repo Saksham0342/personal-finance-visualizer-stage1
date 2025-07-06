@@ -19,10 +19,15 @@ export default function TransactionList({
     setTransactions(data);
   }
 
-  async function deleteTransaction(id: string) {
-    await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-    fetchData();
-  }
+async function deleteTransaction(id: string) {
+  await fetch('/api/transactions/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  fetchData(); // Refresh the list after deletion
+}
+
 
   useEffect(() => {
     fetchData();
