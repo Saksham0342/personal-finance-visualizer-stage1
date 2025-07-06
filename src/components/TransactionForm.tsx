@@ -46,12 +46,17 @@ export default function TransactionForm({
     };
 
     if (editingTransaction) {
-      await fetch(`/api/transactions/${editingTransaction._id}`, {
-        method: "PUT",
+      await fetch("/api/transactions/update", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          id: editingTransaction._id,
+          amount,
+          description,
+          date,
+        }),
       });
-      clearEditing(); // reset edit mode
+      clearEditing();
     } else {
       await fetch("/api/transactions", {
         method: "POST",
