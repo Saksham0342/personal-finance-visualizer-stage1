@@ -1,16 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+// src/app/api/transactions/route.ts
+
 import { connectDB } from '@/lib/mongoose';
 import { Transaction } from '@/models/Transaction';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
-  await connectDB();
-  const data = await Transaction.find().sort({ date: -1 });
-  return NextResponse.json(data);
+  try {
+    await connectDB();
+    const transactions = await Transaction.find().sort({ date: -1 });
+    return NextResponse.json(transactions);
+  } catch (error) {
+    console.error('GET error:', error);
+    return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 });
+  }
 }
 
-export async function POST(req: NextRequest) {
-  await connectDB();
-  const body = await req.json();
-  const created = await Transaction.create(body);
-  return NextResponse.json(created);
+export async function POST(request: NextRequest) {
+  try {
+    await connectDB();
+    const { amount, description, date } = await request.json();
+    const transaction = new Transaction({ amount, description, date });
+    await transaction.save();
+    return NextResponse.json(transaction);
+  } catch (error) {
+    console.error('POST error:', error);
+    return NextResponse.json({ error: 'Failed to add transaction' }, { status: 500 });
+  }
 }
