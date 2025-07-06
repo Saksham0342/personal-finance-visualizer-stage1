@@ -2,21 +2,34 @@ import { connectDB } from '@/lib/mongoose';
 import { Transaction } from '@/models/Transaction';
 import { NextRequest, NextResponse } from 'next/server';
 
-// ✅ Correct handler for DELETE
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-  await connectDB();
-  await Transaction.findByIdAndDelete(context.params.id);
-  return NextResponse.json({ success: true });
-}
-
-// ✅ Correct handler for PUT
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
-  const body = await req.json();
-  const { amount, description, date } = body;
-
+// ✅ DELETE handler
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await connectDB();
+    await Transaction.findByIdAndDelete(context.params.id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete transaction' },
+      { status: 500 }
+    );
+  }
+}
+
+// ✅ PUT handler
+export async function PUT(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  try {
+    await connectDB();
+    const { id } = context.params;
+    const { amount, description, date } = await request.json();
+
     const updated = await Transaction.findByIdAndUpdate(
       id,
       { amount, description, date },
@@ -25,7 +38,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error(error);
+    console.error('PUT error:', error);
     return NextResponse.json(
       { error: 'Failed to update transaction' },
       { status: 500 }
